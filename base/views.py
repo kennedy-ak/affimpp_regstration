@@ -27,11 +27,12 @@ def send_welcome_sms(user):
     profile = user.profile  # Access the profile where the phone number is stored
     phone_number = profile.phone_number
     name = profile.firstname
-    message = "Hi , welcome to our platform! this is a test ".format(user.first_name)
+    message =f"Hi {name}, welcome to our Afimpp-Tvet Course Registration! We're thrilled to have you on board. Please feel free to explore and apply for any courses that interest you.".format(name=user.first_name)
+
     message = requests.utils.quote(message)
 
     key = settings.MNOTIFY_API_KEY
-    sender_id = 'UTAG-BEIC'
+    sender_id = 'Afimpp-Tvet'
     url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={message}&sender_id={sender_id}"
 
     response = requests.get(url)
@@ -42,7 +43,10 @@ def send_welcome_sms(user):
 
 def send_welcome_email(user):
     subject = 'Welcome to Our Platform!'
-    message = f'Hi {user.first_name}, welcome to our amazing platform. We are excited to have you join us!'
+    profile = user.profile
+    name = profile.firstname
+    message = "Hi {name}, welcome to our platform! It's great to see you're ready to advance your skills. Please proceed to apply for your chosen course, and let us know if you need any assistance along the way.".format(name=user.first_name)
+
     email_from = settings.DEFAULT_FROM_EMAIL
     recipient_list = [user.email]
     send_mail(subject, message, email_from, recipient_list)

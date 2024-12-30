@@ -3,14 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Landing Page</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    
-    <h2>Home</h2>
-    <button><a href="{% url 'login'%}"> Student Login </a></button>
-    <button><a href="{% url 'admin_login'%}"> Admin Login</a></button>
-    <button><a href="{% url 'signup'%}"> student register</a></button>
-    
+    <div class="container text-center mt-5">
+        <h1 class="mb-4">Welcome to the Portal</h1>
+        <p class="mb-5">Please choose an option below to get started:</p>
+
+        <div class="d-grid gap-3 col-6 mx-auto">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Student Login</a>
+            <a href="{% url 'admin_login' %}" class="btn btn-secondary btn-lg">Admin Login</a>
+            <a href="{% url 'signup' %}" class="btn btn-success btn-lg">Student Register</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5">
+        <p>&copy; 2024 Portal System. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
