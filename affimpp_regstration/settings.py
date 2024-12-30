@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'affimpp_regstration.urls'
@@ -138,3 +139,23 @@ ADMIN_LOGIN_URL = '/admin-login/'
 LOGIN_REDIRECT_URL = 'student_dashboard'
 
 LOGOUT_REDIRECT_URL = 'login'
+# Whitenoise settings for serving static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False  # Only use one: SSL or TLS
+# EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'kennedyakogokweku@gmail.com'
+EMAIL_HOST_PASSWORD = 'fsjvbeaseumsruzm'  # Use the App Password here
+
+
+MNOTIFY_API_KEY = "qqYaIprq4RZ25q9JENdRqQbKZ"
+
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

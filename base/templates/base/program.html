@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Program Registration Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Program Registration Form</h2>
+
+    {% if messages %}
+    <div class="alert alert-info" role="alert">
+        {% for message in messages %}
+        <div{% if message.tags %} class="alert {{ message.tags }}"{% endif %}>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+
+    <form action="{% url 'register_course' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Personal Information Section -->
+        <fieldset>
+            <legend>Personal Information:</legend>
+            <div class="form-group">
+                <label for="prefix">Prefix (Ms/Mrs/Mr/Dr/Prof/Engr):</label>
+                <select class="form-control" id="prefix" name="prefix" required>
+                    <option value="Mr">Mr</option>
+                    <option value="Mrs">Mrs</option>
+                    <option value="Ms">Ms</option>
+                    <option value="Dr">Dr</option>
+                    <option value="Prof">Prof</option>
+                    <option value="Engr">Engr</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="middleName">Middle Name:</label>
+                <input type="text" class="form-control" id="middleName" name="middleName">
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" required>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" class="form-control" id="dob" name="dob" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select class="form-control" id="gender" name="gender" required>
+                    <option value="">Please select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nationality">Nationality:</label>
+                <input type="text" class="form-control" id="nationality" name="nationality" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Home Address:</label>
+                <input type="text" class="form-control" id="address" name="address" required>
+                <input type="text" class="form-control mt-2" id="address2" name="address2" placeholder="Street Address Line 2">
+                <input type="text" class="form-control mt-2" id="city" name="city" placeholder="City" required>
+                <input type="text" class="form-control mt-2" id="state" name="state" placeholder="State / Province" required>
+                <input type="text" class="form-control mt-2" id="postalCode" name="postalCode" placeholder="Postal / Zip Code" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" class="form-control" id="phone" name="phone"  required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+        </fieldset>
+
+        <!-- Programme of Interest -->
+        <fieldset>
+            <legend>Programme of Interest:</legend>
+            <div class="form-group">
+                <label for="programTitle">Programme Title:</label>
+                <select class="form-control" id="programTitle" name="programTitle" required>
+                    <option value="">Select a programme</option>
+                    <option value="Mining Level 3">Occupational Standards for Mining and Quarrying Technology National Certificate I (Level 3)</option>
+                    <option value="Mines Engineering Level 4">Occupational Standards for Mines Systems Engineering National Certificate 2 (Level 4)</option>
+                    <option value="Mines Engineering Diploma Level 5">OCCUPATIONAL STANDARDS FOR HIGHER NATIONAL DIPLOMA IN MINES SYSTEMS ENGINEERING (Level 5)</option>
+                </select>
+            </div>
+        </fieldset>
+        
+
+        <!-- Educational Background -->
+        <fieldset>
+            <legend>Educational Background:</legend>
+            <div class="form-group">
+                <label for="educationLevel">Highest Level of Education:</label>
+                <input type="text" class="form-control" id="educationLevel" name="educationLevel" required>
+            </div>
+            <div class="form-group">
+                <label for="qualifications">Qualifications/Relevant Certificates Awarded:</label>
+                <input type="text" class="form-control" id="qualifications" name="qualifications" required>
+            </div>
+            <div class="form-group">
+                <label for="institutions">Institution(s) Attended:</label>
+                <input type="text" class="form-control" id="institutions" name="institutions" required.
+            </div>
+        </fieldset>
+
+        <!-- Work Experience -->
+        <fieldset>
+            <legend>Work Experience (if applicable):</legend>
+            <div class="form-group">
+                <label for="occupation">Current/Last Occupation:</label>
+                <input type="text" class="form-control" id="occupation" name="occupation">
+            </div>
+            <div class="form-group">
+                <label for="experience">Years of Experience:</label>
+                <input type="text" class="form-control" id="experience" name="experience">
+            </div>
+            <div class="form-group">
+                <label for="skills">Relevant Skills:</label>
+                <input type="text" class="form-control" id="skills" name="skills">
+            </div>
+        </fieldset>
+
+        <!-- Supporting Documents -->
+        <fieldset>
+            <legend>Supporting Documents:</legend>
+            <div class="form-group">
+                <label for="photo">Upload Your Passport-sized Photo:</label>
+                <input type="file" class="form-control-file" id="photo" name="photo" required>
+            </div>
+            <div class="form-group">
+                <label for="birthCertificate">Upload Birth Certificate/National ID:</label>
+                <input type="file" class="form-control-file" id="birthCertificate" name="birthCertificate" required>
+            </div>
+            <div class="form-group">
+                <label for="educationCertificates">Educational Certificates:</label>
+                <input type="file" class="form-control-file" id="educationCertificates" name="educationCertificates" required.
+            </div>
+            <div class="form-group">
+                <label for="paymentProof">Proof of Payment:</label>
+                <input type="file" class="form-control-file" id="paymentProof" name="paymentProof" required.
+            </div>
+        </fieldset>
+
+        <!-- Declaration -->
+        <fieldset>
+            <legend>Declaration:</legend>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="declaration" required>
+                <label class="form-check-label" for="declaration">
+                    I hereby declare that the information provided is accurate and true. I understand that any false information may lead to my admission being revoked.
+                </label>
+            </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
