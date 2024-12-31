@@ -15,6 +15,41 @@
             <h4>Total Registered Students: <strong>{{ student_count }}</strong></h4>
         </div>
 
+        <!-- Registrations Details -->
+        <div class="mt-4">
+            <h3>Registration Details</h3>
+            {% if registrations %}
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Program Title</th>
+                        <th>Payment Status</th>
+                        <th>Date Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registration in registrations %}
+                    <tr>
+                        <td>{{ registration.first_name }} {{ registration.last_name }}</td>
+                        <td>{{ registration.program_title }}</td>
+                        <td>
+                            {% if registration.payment_status %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-danger">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ registration.date_submitted|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-warning">No registrations available to display.</div>
+            {% endif %}
+        </div>
+
         <!-- Program Registration Counts -->
         <div class="mt-4">
             <h3>Registrations Per Program</h3>

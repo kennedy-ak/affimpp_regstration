@@ -1,3 +1,4 @@
+
 from django.shortcuts import render,redirect
 from django.contrib.auth import  authenticate, login,logout
 from django.contrib import messages
@@ -115,15 +116,18 @@ def admin_login(request):
     return render(request, 'base/admin_login_form.html', {'form': form})
 
 
+
 @login_required(login_url=settings.ADMIN_LOGIN_URL)
 @user_passes_test(is_admin)
 def admin_dashboard(request):
     all_students = Profile.objects.all()
+    registrations = Registration.objects.all()  # Fetch all registrations
     program_counts = Registration.objects.values('program_title').annotate(count=Count('program_title'))
     student_count = all_students.count()  # Get the count of all student profiles
     return render(request, 'base/admin_dashboard.html', {
         'student_count': student_count,
         'program_counts': program_counts,
+        'registrations': registrations,
     })
 
 
@@ -256,6 +260,7 @@ def custom_login(request):
 
 @login_required
 def register(request):
+    registration = Registration.objects.filter(user=request.user).last()  
     if request.method == 'POST':
         try:
             # Create a new registration object without saving to the database yet
@@ -306,7 +311,7 @@ def register(request):
             messages.error(request, f"Unexpected error during registration: {str(e)}")
             return HttpResponse("Error processing your request.", status=500)
 
-    return render(request, 'base/program.html')
+    return render(request, 'base/program.html',{'registration': registration,})
 
 
 import os
@@ -362,3 +367,134 @@ def export_registrations_with_files(request):
     response = HttpResponse(buffer, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="registrations_with_files.zip"'
     return response
+
+import requests
+from django.utils.timezone import now
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.conf import settings
+from .models import Registration, Transaction
+import uuid
+
+# def pay_with_paystack(request, registration_id):
+#     registration = get_object_or_404(Registration, id=registration_id)
+
+#     # Generate a unique transaction ID
+#     transaction_id = str(uuid.uuid4())
+
+#     # Create a Transaction object
+#     transaction = Transaction.objects.create(
+#         transaction_id=transaction_id,
+#         user=request.user,
+#         registration=registration,
+#         amount=250.00,  # GHS 250 fixed amount
+#     )
+
+#     # Initialize Paystack payment
+#     headers = {
+#         "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+#         "Content-Type": "application/json",
+#     }
+#     data = {
+#         "email": request.user.email,
+#         "amount": int(transaction.amount * 100),  # Convert to kobo
+#         "reference": transaction.transaction_id,
+#         "callback_url": request.build_absolute_uri('/payment/callback/'),
+#     }
+#     response = requests.post("https://api.paystack.co/transaction/initialize", headers=headers, json=data)
+
+#     if response.status_code == 200:
+#         return redirect(response.json()['data']['authorization_url'])
+#     else:
+#         return JsonResponse({"error": "Payment initialization failed"}, status=400)
+
+
+def pay_with_paystack(request, registration_id):
+    registration = get_object_or_404(Registration, id=registration_id, user=request.user)
+
+    # Generate a unique transaction ID
+    transaction_id = str(uuid.uuid4())
+
+    # Create a new Transaction object
+    transaction = Transaction.objects.create(
+        transaction_id=transaction_id,
+        user=request.user,
+        registration=registration,
+        amount=registration.amount,  # Use the course-specific fee
+    )
+
+    # Initialize Paystack payment
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
+    data = {
+        "email": request.user.email,
+        "amount": int(transaction.amount * 100),  # Convert GHS to kobo
+        "reference": transaction.transaction_id,
+        "callback_url": request.build_absolute_uri(reverse('payment_callback')),  # Adjusted URL
+    }
+    response = requests.post("https://api.paystack.co/transaction/initialize", headers=headers, json=data)
+
+    if response.status_code == 200:
+        return redirect(response.json()['data']['authorization_url'])
+    else:
+        return JsonResponse({"error": "Payment initialization failed"}, status=400)
+    
+
+# def payment_callback(request):
+#     reference = request.GET.get('reference')
+#     try:
+#         # Verify the transaction with Paystack
+#         headers = {
+#             "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+#         }
+#         response = requests.get(f"https://api.paystack.co/transaction/verify/{reference}", headers=headers)
+#         if response.status_code == 200:
+#             data = response.json()['data']
+#             if data['status'] == 'success':
+#                 # Update transaction as settled
+#                 transaction = Transaction.objects.get(transaction_id=reference)
+#                 transaction.settled = True
+#                 transaction.date_settled = now()
+#                 transaction.save()
+
+#                 # Mark registration as paid
+#                 transaction.registration.payment_status = True
+#                 transaction.registration.save()
+
+#                 return redirect('register_course')  # Redirect back to form after payment
+#         return JsonResponse({"error": "Payment verification failed"}, status=400)
+#     except Transaction.DoesNotExist:
+#         return JsonResponse({"error": "Transaction not found"}, status=404)
+from django.utils.timezone import now
+
+def payment_callback(request):
+    reference = request.GET.get('reference')
+    try:
+        # Verify the transaction with Paystack
+        headers = {
+            "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        }
+        response = requests.get(f"https://api.paystack.co/transaction/verify/{reference}", headers=headers)
+        if response.status_code == 200:
+            data = response.json()['data']
+            if data['status'] == 'success':
+                # Update transaction as settled
+                transaction = Transaction.objects.get(transaction_id=reference)
+                transaction.status = 'Completed'
+                transaction.date_settled = now()
+                transaction.save()
+
+                # Mark the associated registration as paid
+                registration = transaction.registration
+                registration.payment_status = True
+                registration.save()
+
+                messages.success(request, "Payment successful! Your registration has been completed.")
+                return redirect('student_dashboard')
+        messages.error(request, "Payment verification failed. Please try again.")
+        return redirect('student_dashboard')
+    except Transaction.DoesNotExist:
+        messages.error(request, "Transaction not found.")
+        return redirect('student_dashboard')

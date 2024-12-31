@@ -163,8 +163,32 @@
                     I hereby declare that the information provided is accurate and true. I understand that any false information may lead to my admission being revoked.
                 </label>
             </div>
-        </fieldset>
+    <!-- Payment Section -->
+<!-- Payment Section -->
+<fieldset>
+    <legend>Payment:</legend>
+    <p>To complete your registration, please pay the required fee of <strong>GHS 250.00</strong> per course.</p>
+    <div>
+        {% for registration in registrations %}
+            <div>
+                <p><strong>{{ registration.program_title }}</strong></p>
+                {% if not registration.payment_status %}
+                    <a href="{% url 'pay_with_paystack' registration.id %}" class="btn btn-primary">Pay Now</a>
+                {% else %}
+                    <span class="badge bg-success">Payment Completed</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</fieldset>
 
+    
+
+          
+
+
+        
+        
         <button type="submit" class="btn btn-primary">Register</button>
     </form>
 </div>

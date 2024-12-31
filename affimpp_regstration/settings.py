@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'widget_tweaks',
+  
 ]
 
 MIDDLEWARE = [
@@ -139,7 +139,7 @@ ADMIN_LOGIN_URL = '/admin-login/'
 
 LOGIN_REDIRECT_URL = 'student_dashboard'
 
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'landing'
 # Whitenoise settings for serving static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -160,3 +160,9 @@ MNOTIFY_API_KEY = "qqYaIprq4RZ25q9JENdRqQbKZ"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+PAYSTACK_SECRET_KEY ="sk_test_e5548034f1f6577dd88ca6a86599c15cedfee966"
+
+PAYSTACK_PUBLIC_KEY = "pk_test_e463508717d557cbecd7a2e6024fb1decdeffa8f"
+# PAYSTACK_SECRET_KEY =  "sk_live_e08e6b8e8297451355dd0c83ab46de79047603a2"
+# PAYSTACK_PUBLIC_KEY = "pk_live_f1a7cd719ecbc0c5890ad4178cdf0f5f0ce8a2e3"
