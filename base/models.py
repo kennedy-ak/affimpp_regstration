@@ -22,7 +22,7 @@ class Profile(models.Model):
 
 class Registration(models.Model):
     # Personal Information
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="registrations",default=1)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="registrations",)
     PREFIX_CHOICES = [
         ('Mr', 'Mr'),
         ('Mrs', 'Mrs'),

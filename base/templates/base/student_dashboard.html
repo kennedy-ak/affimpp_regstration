@@ -19,8 +19,7 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Program Title</th>
-                    <th scope="col">Duration</th>
-                    <th scope="col">Start Date</th>
+                   
                     <th scope="col">Status</th>
                     <th scope="col">Date Submitted</th>
                 </tr>
@@ -30,8 +29,7 @@
                 <tr>
                     <th scope="row">{{ forloop.counter }}</th>
                     <td>{{ registration.program_title }}</td>
-                    <td>{{ registration.duration }}</td>
-                    <td>{{ registration.start_date }}</td>
+                    
                     <td>{{ registration.status }}</td>
                     <td>{{ registration.date_submitted|date:"M d, Y H:i" }}</td>
                 </tr>

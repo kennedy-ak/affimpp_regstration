@@ -21,7 +21,23 @@ from django.urls import reverse
 from django.conf import settings
 
 # Create your views here.
+def send_ceo_sms():
+    phone_number = 557782728
+    message = """ Dear Administrator,
 
+A new registration form has been submitted. Kindly review and approve it within the next three days. You can access the admin portal at: https://affimpp-regstration.onrender.com/admin/.
+
+Thank you."""
+    #message ="Hello Pro Some just filled a registration form, kindly check and approve within 3 days use this http://127.0.0.1:8000/admin"
+    message = requests.utils.quote(message)
+    key = settings.MNOTIFY_API_KEY
+    sender_id = 'Afimpp'
+    url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={message}&sender_id={sender_id}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        print("SMS sent successfully")
+    else:
+        print("Failed to send SMS")
 
 def send_welcome_sms(user):
     profile = user.profile  # Access the profile where the phone number is stored
@@ -45,7 +61,30 @@ def send_welcome_email(user):
     subject = 'Welcome to Our Platform!'
     profile = user.profile
     name = profile.firstname
-    message = "Hi {name}, welcome to our platform! It's great to see you're ready to advance your skills. Please proceed to apply for your chosen course, and let us know if you need any assistance along the way.".format(name=user.first_name)
+    message = f"""Dear Prospective Student {name},
+
+On behalf of the African Institution of Mining Professionals and Practitioners (AfIMPP), we warmly welcome you to our community!
+
+Thank you for creating an account .  We are excited to have you on board and look forward to supporting your professional development in the mining industry.
+
+As a participant, you will gain access to our comprehensive course materials, expert instructors, and a network of like-minded professionals. Our courses are designed to enhance your skills, knowledge, and career prospects in the mining sector.
+
+To get started, please follow these next steps:
+
+1. Log in to your account to register for your Course
+
+If you have any questions or need assistance, please do not hesitate to contact us at gagyeik@gmail.com 
+ We are always here to help.
+Once again, welcome to AfIMPP! We are committed to supporting your growth and success in the mining industry.
+
+Best regards,
+
+Prof George Agyei 
+CEO
+African Institution of Mining Professionals and Practitioners (AfIMPP)"""
+
+
+   # message = "Hi {name}, welcome to our platform! It's great to see you're ready to advance your skills. Please proceed to apply for your chosen course, and let us know if you need any assistance along the way.".format(name=user.first_name)
 
     email_from = settings.DEFAULT_FROM_EMAIL
     recipient_list = [user.email]
@@ -221,6 +260,7 @@ def register(request):
         try:
             # Create a new registration object without saving to the database yet
             registration = Registration(
+                 user=request.user,
                 prefix=request.POST['prefix'],
                 first_name=request.POST['firstName'],
                 middle_name=request.POST.get('middleName', ''),
@@ -252,6 +292,7 @@ def register(request):
             # Run full clean to catch any model-level validation issues
             registration.full_clean()
             registration.save()
+            send_ceo_sms()
             messages.success(request, "Registration successful!")
             return redirect('student_dashboard')  # Redirect to a success page or dashboard
 
@@ -266,3 +307,58 @@ def register(request):
             return HttpResponse("Error processing your request.", status=500)
 
     return render(request, 'base/program.html')
+
+
+import os
+import csv
+import shutil
+from io import StringIO, BytesIO
+from zipfile import ZipFile
+from django.http import HttpResponse
+from django.conf import settings
+from .models import Registration
+
+def export_registrations_with_files(request):
+    # Create an in-memory ZIP file
+    buffer = BytesIO()
+    with ZipFile(buffer, 'w') as zip_file:
+        # Create a CSV file for metadata
+        csv_buffer = StringIO()
+        csv_writer = csv.writer(csv_buffer)
+        csv_writer.writerow(['User', 'Program Title', 'First Name', 'Last Name', 'Gender', 
+                             'Date of Birth', 'Status', 'Date Submitted', 'Photo', 
+                             'Birth Certificate', 'Educational Certificates', 'Proof of Payment'])
+        
+        # Loop through all registrations
+        for registration in Registration.objects.all():
+            # Write metadata row
+            csv_writer.writerow([
+                registration.user.username,
+                registration.program_title,
+                registration.first_name,
+                registration.last_name,
+                registration.gender,
+                registration.dob,
+                registration.status,
+                registration.date_submitted,
+                os.path.basename(registration.photo.name),
+                os.path.basename(registration.birth_certificate.name),
+                os.path.basename(registration.education_certificates.name),
+                os.path.basename(registration.proof_of_payment.name),
+            ])
+
+            # Add files to ZIP
+            for field in ['photo', 'birth_certificate', 'education_certificates', 'proof_of_payment']:
+                file_field = getattr(registration, field)
+                if file_field and file_field.name:  # Check if the file exists
+                    file_path = file_field.path
+                    zip_file.write(file_path, os.path.join('files', os.path.basename(file_path)))
+
+        # Add the CSV file to the ZIP
+        zip_file.writestr('registrations.csv', csv_buffer.getvalue())
+
+    # Return the ZIP file as a response
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename="registrations_with_files.zip"'
+    return response
