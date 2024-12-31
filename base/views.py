@@ -23,7 +23,7 @@ from django.conf import settings
 
 # Create your views here.
 def send_ceo_sms():
-    phone_number = 557782728
+    phone_number = 500190290
     message = """ Dear Administrator,
 
 A new registration form has been submitted. Kindly review and approve it within the next three days. You can access the admin portal at: https://affimpp-regstration.onrender.com/admin/.
