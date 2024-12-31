@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,13 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@y*6bkj#w@6&$lzy!s=_v&f7=)7@6sff@mq4i#v%8l&7p+3*&@'
+# .env
+SECRET_KEY='django-insecure-@y*6bkj#w@6&$lzy!s=_v&f7=)7@6sff@mq4i#v%8l&7p+3*&@'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG=True
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS= ["*"]
 
 # Application definition
 
@@ -143,26 +142,29 @@ LOGOUT_REDIRECT_URL = 'landing'
 # Whitenoise settings for serving static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
+
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False  # Only use one: SSL or TLS
+  # Only use one: SSL or TLS
 # EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kennedyakogokweku@gmail.com'
 EMAIL_HOST_PASSWORD = 'fsjvbeaseumsruzm'  # Use the App Password here
-
+# mNotify Key
 
 MNOTIFY_API_KEY = "qqYaIprq4RZ25q9JENdRqQbKZ"
 
-
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-PAYSTACK_SECRET_KEY ="sk_test_e5548034f1f6577dd88ca6a86599c15cedfee966"
-
-PAYSTACK_PUBLIC_KEY = "pk_test_e463508717d557cbecd7a2e6024fb1decdeffa8f"
-# PAYSTACK_SECRET_KEY =  "sk_live_e08e6b8e8297451355dd0c83ab46de79047603a2"
+# PAYSTACK_SECRET_KEY= "sk_live_e08e6b8e8297451355dd0c83ab46de79047603a2"
 # PAYSTACK_PUBLIC_KEY = "pk_live_f1a7cd719ecbc0c5890ad4178cdf0f5f0ce8a2e3"
+
+
+PAYSTACK_SECRET_KEY = "sk_test_e5548034f1f6577dd88ca6a86599c15cedfee966"
+PAYSTACK_PUBLIC_KEY = "pk_test_e463508717d557cbecd7a2e6024fb1decdeffa8f"
+
