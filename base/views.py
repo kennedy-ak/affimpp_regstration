@@ -291,7 +291,7 @@ def register(request):
                 photo=request.FILES['photo'],
                 birth_certificate=request.FILES['birthCertificate'],
                 education_certificates=request.FILES['educationCertificates'],
-                proof_of_payment=request.FILES['paymentProof'],
+                
             )
 
             # Run full clean to catch any model-level validation issues

@@ -78,7 +78,7 @@ class Registration(models.Model):
     photo = models.ImageField(upload_to='photos/')
     birth_certificate = models.FileField(upload_to='documents/')
     education_certificates = models.FileField(upload_to='documents/')
-    proof_of_payment = models.FileField(upload_to='documents/', blank=True, null=True)
+    
     date_submitted = models.DateTimeField(default=now)
 
     def __str__(self):
