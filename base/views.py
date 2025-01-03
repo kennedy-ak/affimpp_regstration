@@ -324,7 +324,7 @@ def export_registrations_with_files(request):
             ])
 
             # Add files to ZIP
-            for field in ['photo', 'birth_certificate', 'education_certificates', 'proof_of_payment']:
+            for field in ['photo', 'birth_certificate', 'education_certificates',]:
                 file_field = getattr(registration, field)
                 if file_field and file_field.name:  # Check if the file exists
                     file_path = file_field.path
