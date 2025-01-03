@@ -320,7 +320,7 @@ def export_registrations_with_files(request):
                 os.path.basename(registration.photo.name),
                 os.path.basename(registration.birth_certificate.name),
                 os.path.basename(registration.education_certificates.name),
-                os.path.basename(registration.proof_of_payment.name),
+               
             ])
 
             # Add files to ZIP
