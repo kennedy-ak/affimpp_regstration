@@ -145,13 +145,6 @@ LOGOUT_REDIRECT_URL = 'landing'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'mail.afimpp.institute'  # From the image
-# EMAIL_PORT = 465  # Use SSL as per the image
-# EMAIL_USE_SSL = True  # SSL enabled
-# EMAIL_USE_TLS = False  # Use either SSL or TLS, not both
-# EMAIL_HOST_USER = 'info@afimpp.institute'  # From the image
-# EMAIL_HOST_PASSWORD = '??S}0G?Ll0bS'  # Replace with the actual password
 
 
 
@@ -169,15 +162,16 @@ from decouple import config
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
+
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=True, cast=bool)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-MNOTIFY_API_KEY = config('MNOTIFY_API_KEY')
-
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
+
+MNOTIFY_API_KEY = config('MNOTIFY_API_KEY')
