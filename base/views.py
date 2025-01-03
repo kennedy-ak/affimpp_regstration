@@ -1,29 +1,52 @@
-
+import requests
+import os
+import csv
+import uuid
 from django.shortcuts import render,redirect
-from django.contrib.auth import  authenticate, login,logout
+from django.contrib.auth import  authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import  login_required, user_passes_test
 from .forms import AdminLoginForm,SignUpForm
 from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.conf import settings
+from .models import Registration, Transaction, Profile,Registration
 from django.http import HttpResponse
-from .models import Profile,Registration
-from django.db.models import Count  # Import Count for aggregation
-
+from io import StringIO, BytesIO
+from zipfile import ZipFile
+from django.conf import settings
+from .models import Registration
+from django.db.models import Count  
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.conf import settings
-import requests
-
 from django.contrib.auth.forms import AuthenticationForm
-
 from django.urls import reverse
 
+import sys
+import django
 
+# Add the project root directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Set the Django settings module
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'affimpp_regstration.settings')
+
+# Initialize Django
+django.setup()
+
+# Test access to settings
 from django.conf import settings
+
+
+
 
 # Create your views here.
 def send_ceo_sms():
-    phone_number = 500190290
+    """This is  view to alert the admin when there is successful registration"""
+    phone_number = 557782728
     message = """ Dear Administrator,
 
 A new registration form has been submitted. Kindly review and approve it within the next three days. You can access the admin portal at: https://affimpp-regstration.onrender.com/admin/.
@@ -40,7 +63,9 @@ Thank you."""
     else:
         print("Failed to send SMS")
 
+
 def send_welcome_sms(user):
+    """This is a View to send a welcome message to new students who register (sms)"""
     profile = user.profile  # Access the profile where the phone number is stored
     phone_number = profile.phone_number
     name = profile.firstname
@@ -58,7 +83,9 @@ def send_welcome_sms(user):
     else:
         print("Failed to send SMS")
 
+
 def send_welcome_email(user):
+    """This is a View to send a welcome message to new students who register (email) """
     subject = 'Welcome to Our Platform!'
     profile = user.profile
     name = profile.firstname
@@ -93,13 +120,17 @@ African Institution of Mining Professionals and Practitioners (AfIMPP)"""
 
 
 def landing(request):
+    """Landing page"""
     return render(request, "base/index.html")
 
 
 def is_admin(user):
+    """admin user login"""
     return user.is_staff
 
+
 def admin_login(request):
+    """Admin user login"""
     if request.method == 'POST':
         form = AdminLoginForm(request.POST)
         if form.is_valid():
@@ -116,10 +147,11 @@ def admin_login(request):
     return render(request, 'base/admin_login_form.html', {'form': form})
 
 
-
 @login_required(login_url=settings.ADMIN_LOGIN_URL)
 @user_passes_test(is_admin)
 def admin_dashboard(request):
+    """This is the dashboard for the admin user"""
+
     all_students = Profile.objects.all()
     registrations = Registration.objects.all()  # Fetch all registrations
     program_counts = Registration.objects.values('program_title').annotate(count=Count('program_title'))
@@ -131,12 +163,9 @@ def admin_dashboard(request):
     })
 
 
-
-
-
-   
 @login_required
 def student_dashboard(request):
+    """Student Dashboard"""
   
     firstname = request.user.first_name
     lastname = request.user.last_name
@@ -151,30 +180,9 @@ def student_dashboard(request):
     return render(request, "base/student_dashboard.html", context)
 
 
-# def student_register(request):
-#     if request.method == 'POST':
-#         form = SignUpForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             # Create Profile instance
-#             Profile.objects.create(
-#                 user=user,
-#                 email=form.cleaned_data['email'],
-#                 phone_number=form.cleaned_data['phone_number'],
-#                 firstname=form.cleaned_data['firstname'],
-#                 last_name=form.cleaned_data['last_name']
-#             )
-#             login(request, user)
-#             messages.success(request, 'You have successfully registered and are now logged in.')
-#             return redirect('student_dashboard')  # Ensure this named URL is correctly configured in your urls.py
-#         else:
-#             messages.error(request, 'Please correct the errors in the form.')
-#     else:
-#         form = SignUpForm()
-#     return render(request, 'base/students_register.html', {'form': form})
-
-
 def student_register(request):
+    """This is the view to handle students registration"""
+
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -205,34 +213,8 @@ def student_register(request):
     return render(request, 'base/students_register.html', {'form': form})
 
 
-# def custom_login(request):
-#     if request.method == 'POST':
-#         form = AuthenticationForm(request, data=request.POST)
-#         if form.is_valid():
-#             # Retrieve the username and password from the validated form data
-#             username = form.cleaned_data.get('username')
-#             password = form.cleaned_data.get('password')
-
-#             # Authenticate the user
-#             user = authenticate(username=username, password=password)
-#             if user is not None:
-#                 login(request, user)
-#                 # Redirect to a success page.
-#                 return HttpResponseRedirect(reverse('student_dashboard'))
-#             else:
-#                 messages.error(request, 'Invalid username or password.') 
-#                 return render(request, 'base/student_login.html', {'form': form, 'error_message': 'Invalid username or password.'})
-#         else:
-#             # If the form is not valid, render the page with form errors
-#             return render(request, 'base/student_login.html', {'form': form})
-#     else:
-#         # If a GET (or any other method) we'll create a blank form
-#         form = AuthenticationForm()
-#         return render(request, 'base/student_login.html', {'form': form,})
-
-
-
-def custom_login(request):
+def student_login(request):
+    """This is the view to login in students"""
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -253,13 +235,10 @@ def custom_login(request):
         return render(request, 'base/student_login.html', {'form': form})
     
 
-
-
-
-
-
 @login_required
-def register(request):
+def register_program(request):
+    """This is View to register for a particular program"""
+
     registration = Registration.objects.filter(user=request.user).last()  
     if request.method == 'POST':
         try:
@@ -314,16 +293,8 @@ def register(request):
     return render(request, 'base/program.html',{'registration': registration,})
 
 
-import os
-import csv
-import shutil
-from io import StringIO, BytesIO
-from zipfile import ZipFile
-from django.http import HttpResponse
-from django.conf import settings
-from .models import Registration
-
 def export_registrations_with_files(request):
+    """This is a View to export the information of all registered users"""
     # Create an in-memory ZIP file
     buffer = BytesIO()
     with ZipFile(buffer, 'w') as zip_file:
@@ -368,48 +339,11 @@ def export_registrations_with_files(request):
     response['Content-Disposition'] = 'attachment; filename="registrations_with_files.zip"'
     return response
 
-import requests
-from django.utils.timezone import now
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
-from django.conf import settings
-from .models import Registration, Transaction
-import uuid
-
-# def pay_with_paystack(request, registration_id):
-#     registration = get_object_or_404(Registration, id=registration_id)
-
-#     # Generate a unique transaction ID
-#     transaction_id = str(uuid.uuid4())
-
-#     # Create a Transaction object
-#     transaction = Transaction.objects.create(
-#         transaction_id=transaction_id,
-#         user=request.user,
-#         registration=registration,
-#         amount=250.00,  # GHS 250 fixed amount
-#     )
-
-#     # Initialize Paystack payment
-#     headers = {
-#         "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-#         "Content-Type": "application/json",
-#     }
-#     data = {
-#         "email": request.user.email,
-#         "amount": int(transaction.amount * 100),  # Convert to kobo
-#         "reference": transaction.transaction_id,
-#         "callback_url": request.build_absolute_uri('/payment/callback/'),
-#     }
-#     response = requests.post("https://api.paystack.co/transaction/initialize", headers=headers, json=data)
-
-#     if response.status_code == 200:
-#         return redirect(response.json()['data']['authorization_url'])
-#     else:
-#         return JsonResponse({"error": "Payment initialization failed"}, status=400)
-
 
 def pay_with_paystack(request, registration_id):
+
+    """This is the view to initiate payment with paystack"""
+
     registration = get_object_or_404(Registration, id=registration_id, user=request.user)
 
     # Generate a unique transaction ID
@@ -440,36 +374,11 @@ def pay_with_paystack(request, registration_id):
         return redirect(response.json()['data']['authorization_url'])
     else:
         return JsonResponse({"error": "Payment initialization failed"}, status=400)
-    
 
-# def payment_callback(request):
-#     reference = request.GET.get('reference')
-#     try:
-#         # Verify the transaction with Paystack
-#         headers = {
-#             "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-#         }
-#         response = requests.get(f"https://api.paystack.co/transaction/verify/{reference}", headers=headers)
-#         if response.status_code == 200:
-#             data = response.json()['data']
-#             if data['status'] == 'success':
-#                 # Update transaction as settled
-#                 transaction = Transaction.objects.get(transaction_id=reference)
-#                 transaction.settled = True
-#                 transaction.date_settled = now()
-#                 transaction.save()
-
-#                 # Mark registration as paid
-#                 transaction.registration.payment_status = True
-#                 transaction.registration.save()
-
-#                 return redirect('register_course')  # Redirect back to form after payment
-#         return JsonResponse({"error": "Payment verification failed"}, status=400)
-#     except Transaction.DoesNotExist:
-#         return JsonResponse({"error": "Transaction not found"}, status=404)
-from django.utils.timezone import now
 
 def payment_callback(request):
+    """Call back function """
+
     reference = request.GET.get('reference')
     try:
         # Verify the transaction with Paystack

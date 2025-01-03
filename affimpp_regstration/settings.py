@@ -23,10 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # .env
 
-SECRET_KEY='django-insecure-@y*6bkj#w@6&$lzy!s=_v&f7=)7@6sff@mq4i#v%8l&7p+3*&@'
 
-
-DEBUG=True
 
 ALLOWED_HOSTS= ["*"]
 
@@ -148,28 +145,39 @@ LOGOUT_REDIRECT_URL = 'landing'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'mail.afimpp.institute'  # From the image
+# EMAIL_PORT = 465  # Use SSL as per the image
+# EMAIL_USE_SSL = True  # SSL enabled
+# EMAIL_USE_TLS = False  # Use either SSL or TLS, not both
+# EMAIL_HOST_USER = 'info@afimpp.institute'  # From the image
+# EMAIL_HOST_PASSWORD = '??S}0G?Ll0bS'  # Replace with the actual password
 
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-  # Only use one: SSL or TLS
-# EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kennedyakogokweku@gmail.com'
-EMAIL_HOST_PASSWORD = 'fsjvbeaseumsruzm'  # Use the App Password here
-# mNotify Key
 
-MNOTIFY_API_KEY = "qqYaIprq4RZ25q9JENdRqQbKZ"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# PAYSTACK_SECRET_KEY= "sk_live_e08e6b8e8297451355dd0c83ab46de79047603a2"
-# PAYSTACK_PUBLIC_KEY = "pk_live_f1a7cd719ecbc0c5890ad4178cdf0f5f0ce8a2e3"
 
 
-PAYSTACK_SECRET_KEY = "sk_test_e5548034f1f6577dd88ca6a86599c15cedfee966"
-PAYSTACK_PUBLIC_KEY = "pk_test_e463508717d557cbecd7a2e6024fb1decdeffa8f"
 
+
+
+from decouple import config
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = config('SECRET_KEY')
+
+DEBUG = True
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+MNOTIFY_API_KEY = config('MNOTIFY_API_KEY')
+
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
