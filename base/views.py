@@ -44,24 +44,26 @@ from django.conf import settings
 
 
 # Create your views here.
-def send_ceo_sms():
-    """This is  view to alert the admin when there is successful registration"""
-    phone_number = 557782728
-    message = """ Dear Administrator,
 
-A new registration form has been submitted. Kindly review and approve it within the next three days. You can access the admin portal at: https://affimpp-regstration.onrender.com/admin/.
+def send_ceo_sms():
+    """This view alerts the administrator when a successful registration is made."""
+    phone_numbers = ["557782728", "0500190290"]
+    message = """Dear Administrator,
+
+A new registration form has been submitted. Kindly review and approve it within the next three days. You can access the admin portal at: https://affimpp-regstration.onrender.com/admin/. 
 
 Thank you."""
-    #message ="Hello Pro Some just filled a registration form, kindly check and approve within 3 days use this http://127.0.0.1:8000/admin"
-    message = requests.utils.quote(message)
+    encoded_message = requests.utils.quote(message)
     key = settings.MNOTIFY_API_KEY
     sender_id = 'Afimpp'
-    url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={message}&sender_id={sender_id}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        print("SMS sent successfully")
-    else:
-        print("Failed to send SMS")
+
+    for phone_number in phone_numbers:
+        url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={encoded_message}&sender_id={sender_id}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            print(f"SMS sent successfully to {phone_number}")
+        else:
+            print(f"Failed to send SMS to {phone_number}")
 
 
 def send_welcome_sms(user):
