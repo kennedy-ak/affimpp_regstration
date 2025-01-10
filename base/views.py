@@ -71,7 +71,7 @@ def send_welcome_sms(user):
     profile = user.profile  # Access the profile where the phone number is stored
     phone_number = profile.phone_number
     name = profile.firstname
-    message =f"Hi {name}, welcome to our Afimpp-Tvet Course Registration! We're thrilled to have you on board. Please feel free to explore and apply for any courses that interest you.".format(name=user.first_name)
+    message ="Dear {name}, welcome to the Afimpp-Tvet Course Registration platform! We’re excited to have you on board. Feel free to explore and apply for any courses that interest you. If you encounter any challenges, please don’t hesitate to reach out to the administrator, Kennedy, at 0557782728 or via email at akogokennedy@gmail.com.".format(name=user.first_name)
 
     message = requests.utils.quote(message)
 
