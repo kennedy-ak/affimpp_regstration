@@ -106,7 +106,8 @@ To get started, please follow these next steps:
 If you have any questions or need assistance, please do not hesitate to contact us at gagyeik@gmail.com 
  We are always here to help.
 Once again, welcome to AfIMPP! We are committed to supporting your growth and success in the mining industry.
-
+ If you encounter any challenges, please don’t hesitate to reach out to the administrator,
+ Kennedy, at 0557782728 or via email at akogokennedy@gmail.com.
 Best regards,
 
 Prof George Agyei 
