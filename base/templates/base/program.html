@@ -3,197 +3,772 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Program Registration Form</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>AfIMMP Program Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: rgba(248, 250, 252, 0.8);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header h1 {
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-header i {
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-header h4 {
+            color: #1a202c;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .form-control, .form-select {
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary-modern {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+            color: white;
+        }
+
+        .btn-secondary-modern {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary-modern:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+            color: #2d3748;
+            border-color: #cbd5e0;
+        }
+
+        .file-upload {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .payment-info {
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+            margin: 1rem 0;
+        }
+
+        .required::after {
+            content: '*';
+            color: #fa709a;
+            margin-left: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 0 1rem;
+            }
+            .form-header, .form-body {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-4">
-    <h2>Program Registration Form</h2>
-
-    {% if messages %}
-    <div class="alert alert-info" role="alert">
-        {% for message in messages %}
-        <div{% if message.tags %} class="alert {{ message.tags }}"{% endif %}>
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-
-    <form action="{% url 'register_course' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <!-- Personal Information Section -->
-        <fieldset>
-            <legend>Personal Information:</legend>
-            <div class="form-group">
-                <label for="prefix">Prefix (Ms/Mrs/Mr/Dr/Prof/Engr):</label>
-                <select class="form-control" id="prefix" name="prefix" required>
-                    <option value="Mr">Mr</option>
-                    <option value="Mrs">Mrs</option>
-                    <option value="Ms">Ms</option>
-                    <option value="Dr">Dr</option>
-                    <option value="Prof">Prof</option>
-                    <option value="Engr">Engr</option>
-                </select>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1><i class="fas fa-graduation-cap me-2"></i>Program Registration</h1>
+                <p class="text-muted">Join AfIMMP's world-class mining and engineering programs</p>
             </div>
-            <div class="form-group">
-                <label for="firstName">First Name:</label>
-                <input type="text" class="form-control" id="firstName" name="firstName" required>
-            </div>
-            <div class="form-group">
-                <label for="middleName">Middle Name:</label>
-                <input type="text" class="form-control" id="middleName" name="middleName">
-            </div>
-            <div class="form-group">
-                <label for="lastName">Last Name:</label>
-                <input type="text" class="form-control" id="lastName" name="lastName" required>
-            </div>
-            <div class="form-group">
-                <label for="dob">Date of Birth:</label>
-                <input type="date" class="form-control" id="dob" name="dob" required>
-            </div>
-            <div class="form-group">
-                <label for="gender">Gender:</label>
-                <select class="form-control" id="gender" name="gender" required>
-                    <option value="">Please select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="nationality">Nationality:</label>
-                <input type="text" class="form-control" id="nationality" name="nationality" required>
-            </div>
-            <div class="form-group">
-                <label for="address">Home Address:</label>
-                <input type="text" class="form-control" id="address" name="address" required>
-                <input type="text" class="form-control mt-2" id="address2" name="address2" placeholder="Street Address Line 2">
-                <input type="text" class="form-control mt-2" id="city" name="city" placeholder="City" required>
-                <input type="text" class="form-control mt-2" id="state" name="state" placeholder="State / Province/ Region" required>
-                <input type="text" class="form-control mt-2" id="postalCode" name="postalCode" placeholder="Postal Code" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone Number:</label>
-                <input type="tel" class="form-control" id="phone" name="phone"  required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email Address:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-        </fieldset>
-
-        <!-- Programme of Interest -->
-        <fieldset>
-            <legend>Programme of Interest:</legend>
-            <div class="form-group">
-                <label for="programTitle">Programme Title:</label>
-                <select class="form-control" id="programTitle" name="programTitle" required>
-                    <option value="">Select a programme</option>
-                    <option value="Mining Level 3">Occupational Standards for Mining and Quarrying Technology National Certificate I (Level 3)</option>
-                    <option value="Mines Engineering Level 4">Occupational Standards for Mines Systems Engineering National Certificate 2 (Level 4)</option>
-                    <option value="Mines Engineering Diploma Level 5">OCCUPATIONAL STANDARDS FOR HIGHER NATIONAL DIPLOMA IN MINES SYSTEMS ENGINEERING (Level 5)</option>
-                </select>
-            </div>
-        </fieldset>
-        
-
-        <!-- Educational Background -->
-        <fieldset>
-            <legend>Educational Background:</legend>
-            <div class="form-group">
-                <label for="educationLevel">Highest Level of Education:</label>
-                
-                <input type="text" class="form-control" id="educationLevel" name="educationLevel" required>
-            </div>
-            <div class="form-group">
-                <label for="qualifications">Qualifications/Relevant Certificates Awarded:</label>
-                <input type="text" class="form-control" id="qualifications" name="qualifications" required>
-            </div>
-            <div class="form-group">
-                <label for="institutions">Institution(s) Attended:</label>
-                <input type="text" class="form-control" id="institutions" name="institutions" required.
-            </div>
-        </fieldset>
-
-        <!-- Work Experience -->
-        <fieldset>
-            <legend>Work Experience (if applicable):</legend>
-            <div class="form-group">
-                <label for="occupation">Current/Last Occupation:</label>
-                <input type="text" class="form-control" id="occupation" name="occupation">
-            </div>
-            <div class="form-group">
-                <label for="experience">Years of Experience:</label>
-                <input type="text" class="form-control" id="experience" name="experience">
-            </div>
-            <div class="form-group">
-                <label for="skills">Relevant Skills:</label>
-                <input type="text" class="form-control" id="skills" name="skills">
-            </div>
-        </fieldset>
-
-        <!-- Supporting Documents -->
-        <fieldset>
-            <legend>Supporting Documents:</legend>
-            <div class="form-group">
-                <label for="photo">Upload Your Passport-sized Photo:</label>
-                <input type="file" class="form-control-file" id="photo" name="photo" required>
-            </div>
-            <div class="form-group">
-                <label for="birthCertificate">Upload Birth Certificate/National ID:</label>
-                <input type="file" class="form-control-file" id="birthCertificate" name="birthCertificate" required>
-            </div>
-            <div class="form-group">
-                <label for="educationCertificates">Educational Certificates:</label>
-                <input type="file" class="form-control-file" id="educationCertificates" name="educationCertificates" required.
-            </div>
-            <div class="form-group">
-                <label for="paymentProof">Proof of Payment:</label>
-                <input type="file" class="form-control-file" id="paymentProof" name="paymentProof" required.
-            </div>
-        </fieldset>
-
-        <!-- Declaration -->
-        <fieldset>
-            <legend>Declaration:</legend>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="declaration" required>
-                <label class="form-check-label" for="declaration">
-                    I hereby declare that the information provided is accurate and true. I understand that any false information may lead to my admission being revoked.
-                </label>
-            </div>
-    <!-- Payment Section -->
-<!-- Payment Section -->
-<fieldset>
-    <legend>Payment:</legend>
-    <p>To complete your registration, please pay the required fee of <strong>GHS 250.00</strong> per course.</p>
-    <div>
-        {% for registration in registrations %}
-            <div>
-                <p><strong>{{ registration.program_title }}</strong></p>
-                {% if not registration.payment_status %}
-                    <a href="{% url 'pay_with_paystack' registration.id %}" class="btn btn-primary">Pay Now</a>
-                {% else %}
-                    <span class="badge bg-success">Payment Completed</span>
+            
+            <div class="form-body">
+                {% if messages %}
+                <div class="alert alert-info d-flex align-items-center mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <div>
+                        {% for message in messages %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                </div>
                 {% endif %}
+
+                <form action="{% url 'register_course' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Personal Information -->
+                    <div class="section-header">
+                        <i class="fas fa-user"></i>
+                        <h4>Personal Information</h4>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">Prefix</label>
+                            <select class="form-select" name="prefix" required>
+                                <option value="">Select</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Dr">Dr</option>
+                                <option value="Prof">Prof</option>
+                                <option value="Engr">Engr</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">First Name</label>
+                            <input type="text" class="form-control" name="firstName" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Middle Name</label>
+                            <input type="text" class="form-control" name="middleName">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">Last Name</label>
+                            <input type="text" class="form-control" name="lastName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Date of Birth</label>
+                            <input type="date" class="form-control" name="dob" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Gender</label>
+                            <select class="form-select" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Nationality</label>
+                            <input type="text" class="form-control" name="nationality" required>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="section-header">
+                        <i class="fas fa-address-card"></i>
+                        <h4>Contact Information</h4>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Home Address</label>
+                        <input type="text" class="form-control mb-2" name="address" placeholder="Street Address" required>
+                        <input type="text" class="form-control" name="address2" placeholder="Street Address Line 2">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">City</label>
+                            <input type="text" class="form-control" name="city" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">State/Region</label>
+                            <input type="text" class="form-control" name="state" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">Postal Code</label>
+                            <input type="text" class="form-control" name="postalCode" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label required">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Email Address</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+
+                    <!-- Program Selection -->
+                    <div class="section-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>Program Selection</h4>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label required">Choose Your Program</label>
+                        <select class="form-select" name="programTitle" required>
+                            <option value="">Select a program</option>
+                            <option value="Mining Level 3">Mining and Quarrying Technology - Level 3</option>
+                            <option value="Mines Engineering Level 4">Mines Systems Engineering - Level 4</option>
+                            <option value="Mines Engineering Diploma Level 5">Higher National Diploma in Mines Systems Engineering - Level 5</option>
+                        </select>
+                    </div>
+                    
+                    <div class="payment-info">
+                        <h5><i class="fas fa-credit-card me-2"></i>Program Fee</h5>
+                        <div class="fs-4 fw-bold text-primary">GHS 250.00</div>
+                        <small class="text-muted">Per program registration</small>
+                    </div>
+
+                    <!-- Education & Experience -->
+                    <div class="section-header">
+                        <i class="fas fa-school"></i>
+                        <h4>Education & Experience</h4>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Highest Education Level</label>
+                            <input type="text" class="form-control" name="educationLevel" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Qualifications/Certificates</label>
+                            <input type="text" class="form-control" name="qualifications" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label required">Institution(s) Attended</label>
+                            <input type="text" class="form-control" name="institutions" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Current/Last Occupation</label>
+                            <input type="text" class="form-control" name="occupation">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Years of Experience</label>
+                            <input type="text" class="form-control" name="experience">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Relevant Skills</label>
+                            <input type="text" class="form-control" name="skills" placeholder="Comma separated">
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="section-header">
+                        <i class="fas fa-file-upload"></i>
+                        <h4>Supporting Documents</h4>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required">Passport Photo</label>
+                            <div class="file-upload" onclick="document.getElementById('photo').click()">
+                                <i class="fas fa-camera fs-2 text-muted mb-2"></i>
+                                <p class="mb-0">Click to upload photo</p>
+                                <small class="text-muted">JPEG, PNG (Max: 5MB)</small>
+                            </div>
+                            <input type="file" class="d-none" id="photo" name="photo" accept="image/*" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required">Birth Certificate/ID</label>
+                            <div class="file-upload" onclick="document.getElementById('birthCertificate').click()">
+                                <i class="fas fa-id-card fs-2 text-muted mb-2"></i>
+                                <p class="mb-0">Click to upload ID</p>
+                                <small class="text-muted">PDF, JPEG, PNG (Max: 10MB)</small>
+                            </div>
+                            <input type="file" class="d-none" id="birthCertificate" name="birthCertificate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required">Education Certificates</label>
+                            <div class="file-upload" onclick="document.getElementById('educationCertificates').click()">
+                                <i class="fas fa-certificate fs-2 text-muted mb-2"></i>
+                                <p class="mb-0">Click to upload certificates</p>
+                                <small class="text-muted">PDF, JPEG, PNG (Max: 10MB each) - Multiple files allowed</small>
+                            </div>
+                            <input type="file" class="d-none" id="educationCertificates" name="educationCertificates" multiple required>
+                            <div id="certificateFileList" class="mt-2"></div>
+                        </div>
+                        
+                    </div>
+
+                    <!-- Declaration -->
+                    <div class="section-header">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Declaration</h4>
+                    </div>
+                    
+                    <div class="form-check p-3 bg-light rounded">
+                        <input class="form-check-input" type="checkbox" id="declaration" name="declaration" required>
+                        <label class="form-check-label" for="declaration">
+                            <strong>I hereby declare</strong> that all information provided is accurate and true. I understand that any false information may lead to my admission being revoked. I agree to the terms and conditions of AfIMMP.
+                        </label>
+                    </div>
+
+                    <!-- Payment Information -->
+                    <div class="section-header">
+                        <i class="fas fa-credit-card"></i>
+                        <h4>Payment Information</h4>
+                    </div>
+                    
+                    <div class="payment-info">
+                        <h5><i class="fas fa-credit-card me-2"></i>Program Fee Payment</h5>
+                        <div class="fs-4 fw-bold text-primary mb-2">GHS 250.00</div>
+                        <p class="text-muted mb-3">You will be able to pay after submitting your registration form</p>
+                        
+                        <!-- Show existing registrations if any -->
+                        {% if registrations %}
+                            <div class="existing-registrations">
+                                <h6 class="fw-bold mb-2">Your Previous Registrations:</h6>
+                                {% for registration in registrations %}
+                                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                        <div>
+                                            <strong>{{ registration.program_title }}</strong>
+                                            <small class="d-block text-muted">Submitted: {{ registration.date_submitted|date:"M d, Y" }}</small>
+                                        </div>
+                                        {% if not registration.payment_status %}
+                                            <a href="{% url 'pay_with_paystack' registration.id %}" class="btn btn-modern btn-primary-modern btn-sm">
+                                                <i class="fas fa-credit-card"></i>Pay Now
+                                            </a>
+                                        {% else %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Payment Completed
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="payment-notice bg-light p-3 rounded">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-info-circle text-primary mt-1"></i>
+                                    <div>
+                                        <strong>Payment Process:</strong>
+                                        <ol class="mb-0 mt-1 ps-3">
+                                            <li>Submit your registration form</li>
+                                            <li>Go to your dashboard</li>
+                                            <li>Click "Pay Now" for your registration</li>
+                                            <li>Complete payment via Paystack</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit and Cancel Buttons -->
+                    <div class="text-center mt-4">
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <button type="button" class="btn btn-modern btn-secondary-modern" onclick="cancelRegistration()">
+                                <i class="fas fa-times"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-modern btn-primary-modern btn-lg">
+                                <i class="fas fa-paper-plane"></i>Submit Registration
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        {% endfor %}
+        </div>
     </div>
-</fieldset>
 
-    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File upload feedback
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const uploadArea = this.previousElementSibling;
+                
+                // Handle multiple files for education certificates
+                if (this.id === 'educationCertificates' && this.files.length > 0) {
+                    // Get existing files
+                    const existingFiles = Array.from(this.files);
+                    const storedFiles = this.storedFiles || [];
+                    
+                    // Combine existing stored files with new files
+                    const allFiles = [...storedFiles, ...existingFiles];
+                    
+                    // Create new DataTransfer with all files
+                    const dt = new DataTransfer();
+                    allFiles.forEach(file => dt.items.add(file));
+                    
+                    // Update input with combined files
+                    this.files = dt.files;
+                    this.storedFiles = allFiles;
+                    
+                    const fileListContainer = document.getElementById('certificateFileList');
+                    fileListContainer.innerHTML = '';
+                    
+                    uploadArea.innerHTML = `
+                        <i class="fas fa-check-circle fs-2 text-success mb-2"></i>
+                        <p class="mb-0 text-success fw-bold">${allFiles.length} certificate(s) selected</p>
+                        <small class="text-muted">Files uploaded successfully - Click to add more</small>
+                    `;
+                    uploadArea.style.borderColor = '#4facfe';
+                    uploadArea.style.background = 'rgba(79, 172, 254, 0.1)';
+                    
+                    // Display list of all uploaded files
+                    allFiles.forEach((file, index) => {
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'bg-light p-2 rounded mb-1 d-flex justify-content-between align-items-center';
+                        fileItem.innerHTML = `
+                            <span><i class="fas fa-file-alt text-primary me-2"></i>${file.name} (${fileSize}MB)</span>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeCertificateFile(${index})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        fileListContainer.appendChild(fileItem);
+                    });
+                }
+                // Handle single files for other uploads
+                else if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2);
+                    uploadArea.innerHTML = `
+                        <i class="fas fa-check-circle fs-2 text-success mb-2"></i>
+                        <p class="mb-0 text-success fw-bold">${fileName}</p>
+                        <small class="text-muted">${fileSize}MB - Upload successful</small>
+                    `;
+                    uploadArea.style.borderColor = '#4facfe';
+                    uploadArea.style.background = 'rgba(79, 172, 254, 0.1)';
+                }
+            });
+        });
 
-          
+        // Function to remove individual certificate files
+        window.removeCertificateFile = function(indexToRemove) {
+            const input = document.getElementById('educationCertificates');
+            const storedFiles = input.storedFiles || [];
+            
+            // Remove the file at the specified index
+            storedFiles.splice(indexToRemove, 1);
+            
+            // Update the input with remaining files
+            const dt = new DataTransfer();
+            storedFiles.forEach(file => dt.items.add(file));
+            input.files = dt.files;
+            input.storedFiles = storedFiles;
+            
+            // Update the display
+            if (storedFiles.length === 0) {
+                const uploadArea = input.previousElementSibling;
+                uploadArea.innerHTML = `
+                    <i class="fas fa-certificate fs-2 text-muted mb-2"></i>
+                    <p class="mb-0">Click to upload certificates</p>
+                    <small class="text-muted">PDF, JPEG, PNG (Max: 10MB each) - Multiple files allowed</small>
+                `;
+                uploadArea.style.borderColor = '#cbd5e0';
+                uploadArea.style.background = '';
+                document.getElementById('certificateFileList').innerHTML = '';
+            } else {
+                // Trigger change event to update display
+                input.dispatchEvent(new Event('change'));
+            }
+        };
 
+        // Add drag and drop functionality
+        document.querySelectorAll('.file-upload').forEach(uploadArea => {
+            const fileInput = uploadArea.nextElementSibling;
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#667eea';
+                this.style.background = 'rgba(102, 126, 234, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#cbd5e0';
+                this.style.background = '';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#cbd5e0';
+                this.style.background = '';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        });
 
-        
-        
-        <button type="submit" class="btn btn-primary">Register</button>
-    </form>
-</div>
+        // Form submission loading
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const declaration = document.getElementById('declaration');
+            if (!declaration.checked) {
+                e.preventDefault();
+                alert('Please accept the declaration to proceed.');
+                declaration.focus();
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+            submitBtn.disabled = true;
+        });
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+        // Real-time validation with better feedback
+        document.querySelectorAll('input[required], select[required]').forEach(field => {
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = '#4facfe';
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.style.borderColor = '#e2e8f0';
+                    this.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+            
+            field.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.style.borderColor = '#fa709a';
+                    this.classList.add('is-invalid');
+                } else if (this.value.trim()) {
+                    this.style.borderColor = '#4facfe';
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+
+        // Email validation
+        const emailField = document.querySelector('input[type="email"]');
+        if (emailField) {
+            emailField.addEventListener('input', function() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (this.value && !emailRegex.test(this.value)) {
+                    this.style.borderColor = '#fa709a';
+                    this.classList.add('is-invalid');
+                } else if (this.value) {
+                    this.style.borderColor = '#4facfe';
+                    this.classList.add('is-valid');
+                }
+            });
+        }
+
+        // Phone number formatting
+        const phoneField = document.querySelector('input[type="tel"]');
+        if (phoneField) {
+            phoneField.addEventListener('input', function() {
+                // Remove non-digits
+                let value = this.value.replace(/\D/g, '');
+                // Limit to 15 digits
+                if (value.length > 15) {
+                    value = value.slice(0, 15);
+                }
+                this.value = value;
+                
+                // Validation feedback
+                if (value.length >= 10) {
+                    this.style.borderColor = '#4facfe';
+                    this.classList.add('is-valid');
+                } else if (value.length > 0) {
+                    this.style.borderColor = '#fa709a';
+                    this.classList.add('is-invalid');
+                }
+            });
+        }
+
+        // Age validation for date of birth
+        const dobField = document.querySelector('input[type="date"]');
+        if (dobField) {
+            dobField.addEventListener('change', function() {
+                const birthDate = new Date(this.value);
+                const today = new Date();
+                const age = today.getFullYear() - birthDate.getFullYear();
+                
+                if (age < 16 || age > 100) {
+                    this.style.borderColor = '#fa709a';
+                    this.classList.add('is-invalid');
+                    alert('Age must be between 16 and 100 years');
+                } else {
+                    this.style.borderColor = '#4facfe';
+                    this.classList.add('is-valid');
+                }
+            });
+        }
+
+        // Cancel registration function
+        function cancelRegistration() {
+            if (confirm('Are you sure you want to cancel your registration? All entered data will be lost.')) {
+                // Clear the form
+                document.querySelector('form').reset();
+                
+                // Reset all file upload areas
+                document.querySelectorAll('.file-upload').forEach(uploadArea => {
+                    const fileInput = uploadArea.nextElementSibling;
+                    const inputId = fileInput.id;
+                    
+                    if (inputId === 'educationCertificates') {
+                        uploadArea.innerHTML = `
+                            <i class="fas fa-certificate fs-2 text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload certificates</p>
+                            <small class="text-muted">PDF, JPEG, PNG (Max: 10MB each) - Multiple files allowed</small>
+                        `;
+                        document.getElementById('certificateFileList').innerHTML = '';
+                        fileInput.storedFiles = [];
+                    } else if (inputId === 'photo') {
+                        uploadArea.innerHTML = `
+                            <i class="fas fa-camera fs-2 text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload photo</p>
+                            <small class="text-muted">JPEG, PNG (Max: 5MB)</small>
+                        `;
+                    } else if (inputId === 'birthCertificate') {
+                        uploadArea.innerHTML = `
+                            <i class="fas fa-id-card fs-2 text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload ID</p>
+                            <small class="text-muted">PDF, JPEG, PNG (Max: 10MB)</small>
+                        `;
+                    } else if (inputId === 'paymentProof') {
+                        uploadArea.innerHTML = `
+                            <i class="fas fa-receipt fs-2 text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload receipt</p>
+                            <small class="text-muted">PDF, JPEG, PNG (Max: 5MB)</small>
+                        `;
+                    }
+                    
+                    uploadArea.style.borderColor = '#cbd5e0';
+                    uploadArea.style.background = '';
+                });
+                
+                // Reset form validation states
+                document.querySelectorAll('.form-control, .form-select').forEach(field => {
+                    field.style.borderColor = '#e2e8f0';
+                    field.classList.remove('is-valid', 'is-invalid');
+                });
+                
+                // Optionally redirect to dashboard
+                if (confirm('Would you like to return to your dashboard?')) {
+                    window.location.href = "{% url 'student_dashboard' %}";
+                }
+            }
+        }
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const files = Array.from(this.files);
+                let isValid = true;
+                
+                files.forEach(file => {
+                    const maxSize = this.id === 'photo' ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB for photo, 10MB for others
+                    
+                    if (file.size > maxSize) {
+                        alert(`File "${file.name}" is too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
+                        isValid = false;
+                    }
+                    
+                    const allowedTypes = this.id === 'photo' ? ['image/jpeg', 'image/png'] : ['image/jpeg', 'image/png', 'application/pdf'];
+                    
+                    if (!allowedTypes.includes(file.type)) {
+                        alert(`File "${file.name}" is not a valid file type. Please upload JPEG, PNG${this.id !== 'photo' ? ', or PDF' : ''} files only.`);
+                        isValid = false;
+                    }
+                });
+                
+                if (!isValid) {
+                    this.value = '';
+                    // Reset upload area for invalid files
+                    const uploadArea = this.previousElementSibling;
+                    if (this.id === 'educationCertificates') {
+                        uploadArea.innerHTML = `
+                            <i class="fas fa-certificate fs-2 text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload certificates</p>
+                            <small class="text-muted">PDF, JPEG, PNG (Max: 10MB each) - Multiple files allowed</small>
+                        `;
+                        document.getElementById('certificateFileList').innerHTML = '';
+                    } else {
+                        uploadArea.innerHTML = uploadArea.getAttribute('data-original-content') || uploadArea.innerHTML;
+                    }
+                    uploadArea.style.borderColor = '#cbd5e0';
+                    uploadArea.style.background = '';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

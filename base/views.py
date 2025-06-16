@@ -150,38 +150,167 @@ def admin_login(request):
     return render(request, 'base/admin_login_form.html', {'form': form})
 
 
+# @login_required(login_url=settings.ADMIN_LOGIN_URL)
+# @user_passes_test(is_admin)
+# def admin_dashboard(request):
+#     """Enhanced admin dashboard with approval/rejection functionality"""
+    
+#     if request.method == 'POST':
+#         registration_id = request.POST.get('registration_id')
+#         action = request.POST.get('action')
+        
+#         try:
+#             registration = Registration.objects.get(id=registration_id)
+            
+#             if action == 'approve':
+#                 registration.status = 'Approved'
+#                 registration.approved_date = now()
+#                 registration.save()
+                
+#                 # Send approval SMS
+#                 send_approval_sms(registration)
+#                 messages.success(request, f'{registration.first_name} {registration.last_name} has been approved!')
+                
+#             elif action == 'reject':
+#                 rejection_reason = request.POST.get('rejection_reason')
+#                 rejection_message = request.POST.get('rejection_message')
+                
+#                 registration.status = 'Rejected'
+#                 registration.rejection_reason = rejection_reason
+#                 registration.rejection_message = rejection_message
+#                 registration.rejected_date = now()
+#                 registration.save()
+                
+#                 # Send rejection SMS
+#                 send_rejection_sms(registration)
+#                 messages.success(request, f'{registration.first_name} {registration.last_name} has been rejected.')
+                
+#         except Registration.DoesNotExist:
+#             messages.error(request, 'Registration not found.')
+            
+#         return redirect('admin_dashboard')
+    
+#     # Get statistics
+#     all_students = Profile.objects.all()
+#     registrations = Registration.objects.all().order_by('-date_submitted')
+#     program_counts = Registration.objects.values('program_title').annotate(count=Count('program_title'))
+    
+#     # Status counts
+#     student_count = registrations.count()
+#     pending_count = registrations.filter(status='Pending').count()
+#     approved_count = registrations.filter(status='Approved').count()
+#     rejected_count = registrations.filter(status='Rejected').count()
+    
+#     return render(request, 'base/admin_dashboard.html', {
+#         'student_count': student_count,
+#         'pending_count': pending_count,
+#         'approved_count': approved_count,
+#         'rejected_count': rejected_count,
+#         'program_counts': program_counts,
+#         'registrations': registrations,
+#     })
 @login_required(login_url=settings.ADMIN_LOGIN_URL)
 @user_passes_test(is_admin)
 def admin_dashboard(request):
-    """This is the dashboard for the admin user"""
-
+    """Enhanced admin dashboard with approval/rejection functionality"""
+    
+    if request.method == 'POST':
+        registration_id = request.POST.get('registration_id')
+        action = request.POST.get('action')
+        
+        try:
+            registration = Registration.objects.get(id=registration_id)
+            
+            if action == 'approve':
+                registration.status = 'Approved'
+                registration.approved_date = now()
+                registration.save()
+                
+                # Send approval SMS and Email
+                send_approval_sms(registration)
+                send_approval_email(registration)
+                messages.success(request, f'{registration.first_name} {registration.last_name} has been approved!')
+                
+            elif action == 'reject':
+                rejection_reason = request.POST.get('rejection_reason')
+                rejection_message = request.POST.get('rejection_message')
+                
+                registration.status = 'Rejected'
+                registration.rejection_reason = rejection_reason
+                registration.rejection_message = rejection_message
+                registration.rejected_date = now()
+                registration.save()
+                
+                # Send rejection SMS and Email
+                send_rejection_sms(registration)
+                send_rejection_email(registration)
+                messages.success(request, f'{registration.first_name} {registration.last_name} has been rejected.')
+                
+        except Registration.DoesNotExist:
+            messages.error(request, 'Registration not found.')
+            
+        return redirect('admin_dashboard')
+    
+    # Get statistics
     all_students = Profile.objects.all()
-    registrations = Registration.objects.all()  # Fetch all registrations
+    registrations = Registration.objects.all().order_by('-date_submitted')
     program_counts = Registration.objects.values('program_title').annotate(count=Count('program_title'))
-    student_count = all_students.count()  # Get the count of all student profiles
+    
+    # Status counts
+    student_count = registrations.count()
+    pending_count = registrations.filter(status='Pending').count()
+    approved_count = registrations.filter(status='Approved').count()
+    rejected_count = registrations.filter(status='Rejected').count()
+    
     return render(request, 'base/admin_dashboard.html', {
         'student_count': student_count,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
         'program_counts': program_counts,
         'registrations': registrations,
     })
 
+# @login_required
+# def student_dashboard(request):
+#     """Student Dashboard"""
+  
+#     firstname = request.user.first_name
+#     lastname = request.user.last_name
+#     registrations = Registration.objects.filter(user=request.user)
 
+#     context = {
+#         'firstname': firstname,
+#         'lastname': lastname,
+#         'registrations': registrations
+#     }
+
+#     return render(request, "base/student_dashboard.html", context)
+
+
+
+# Also update your existing student_dashboard view to include user object
 @login_required
 def student_dashboard(request):
     """Student Dashboard"""
-  
     firstname = request.user.first_name
     lastname = request.user.last_name
     registrations = Registration.objects.filter(user=request.user)
+    
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        profile = None
 
     context = {
+        'user': request.user,  # Add this line
         'firstname': firstname,
         'lastname': lastname,
-        'registrations': registrations
+        'registrations': registrations,
+        'profile': profile,  # Add this line
     }
 
     return render(request, "base/student_dashboard.html", context)
-
 
 def student_register(request):
     """This is the view to handle students registration"""
@@ -238,16 +367,75 @@ def student_login(request):
         return render(request, 'base/student_login.html', {'form': form})
     
 
+# @login_required
+# def register_program(request):
+#     """This is View to register for a particular program"""
+
+#     registration = Registration.objects.filter(user=request.user).last()  
+#     if request.method == 'POST':
+#         try:
+#             # Create a new registration object without saving to the database yet
+#             registration = Registration(
+#                  user=request.user,
+#                 prefix=request.POST['prefix'],
+#                 first_name=request.POST['firstName'],
+#                 middle_name=request.POST.get('middleName', ''),
+#                 last_name=request.POST['lastName'],
+#                 dob=request.POST['dob'],
+#                 gender=request.POST['gender'],
+#                 nationality=request.POST['nationality'],
+#                 address=request.POST['address'],
+#                 address2=request.POST.get('address2', ''),
+#                 city=request.POST['city'],
+#                 state=request.POST['state'],
+#                 postal_code=request.POST['postalCode'],
+#                 phone=request.POST['phone'],
+#                 email=request.POST['email'],
+#                 program_title=request.POST['programTitle'],
+                
+#                 education_level=request.POST['educationLevel'],
+#                 qualifications=request.POST['qualifications'],
+#                 institutions_attended=request.POST['institutions'],
+#                 current_occupation=request.POST.get('occupation', ''),
+#                 years_experience=int(request.POST.get('experience', 0)),
+#                 relevant_skills=request.POST.get('skills', ''),
+#                 photo=request.FILES['photo'],
+#                 birth_certificate=request.FILES['birthCertificate'],
+#                 education_certificates=request.FILES['educationCertificates'],
+                
+#             )
+
+#             # Run full clean to catch any model-level validation issues
+#             registration.full_clean()
+#             registration.save()
+#             send_ceo_sms()
+#             messages.success(request, "Registration successful!")
+#             return redirect('student_dashboard')  # Redirect to a success page or dashboard
+
+#         except ValidationError as e:
+#             # Handle specific field errors from Django's validation
+#             for field, errors in e.message_dict.items():
+#                 for error in errors:
+#                     messages.error(request, f"{field}: {error}")
+#         except Exception as e:
+#             # Handle unexpected errors
+#             messages.error(request, f"Unexpected error during registration: {str(e)}")
+#             return HttpResponse("Error processing your request.", status=500)
+
+#     return render(request, 'base/program.html',{'registration': registration,})
+
 @login_required
 def register_program(request):
-    """This is View to register for a particular program"""
-
-    registration = Registration.objects.filter(user=request.user).last()  
+    """View to register for a particular program"""
+    
+    # Get user's existing registrations to show payment status
+    user_registrations = Registration.objects.filter(user=request.user)
+    
     if request.method == 'POST':
         try:
-            # Create a new registration object without saving to the database yet
+            # Create a new registration object
             registration = Registration(
-                 user=request.user,
+                user=request.user,
                 prefix=request.POST['prefix'],
                 first_name=request.POST['firstName'],
                 middle_name=request.POST.get('middleName', ''),
@@ -263,7 +451,6 @@ def register_program(request):
                 phone=request.POST['phone'],
                 email=request.POST['email'],
                 program_title=request.POST['programTitle'],
-                
                 education_level=request.POST['educationLevel'],
                 qualifications=request.POST['qualifications'],
                 institutions_attended=request.POST['institutions'],
@@ -273,28 +460,26 @@ def register_program(request):
                 photo=request.FILES['photo'],
                 birth_certificate=request.FILES['birthCertificate'],
                 education_certificates=request.FILES['educationCertificates'],
-                
             )
 
-            # Run full clean to catch any model-level validation issues
+            # Run validation and save
             registration.full_clean()
             registration.save()
             send_ceo_sms()
-            messages.success(request, "Registration successful!")
-            return redirect('student_dashboard')  # Redirect to a success page or dashboard
+            
+            messages.success(request, f"Registration successful! You can now proceed to payment.")
+            return redirect('student_dashboard')  # Redirect to dashboard where payment button will be available
 
         except ValidationError as e:
-            # Handle specific field errors from Django's validation
             for field, errors in e.message_dict.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
         except Exception as e:
-            # Handle unexpected errors
-            messages.error(request, f"Unexpected error during registration: {str(e)}")
-            return HttpResponse("Error processing your request.", status=500)
+            messages.error(request, f"Error during registration: {str(e)}")
 
-    return render(request, 'base/program.html',{'registration': registration,})
-
+    return render(request, 'base/program.html', {
+        'registrations': user_registrations,  # Pass existing registrations
+    })
 
 def export_registrations_with_files(request):
     """This is a View to export the information of all registered users"""
@@ -410,3 +595,437 @@ def payment_callback(request):
     except Transaction.DoesNotExist:
         messages.error(request, "Transaction not found.")
         return redirect('student_dashboard')
+
+
+def send_approval_sms(registration):
+    """Send SMS notification when registration is approved"""
+    phone_number = registration.phone
+    name = registration.first_name
+    program = registration.program_title
+    
+    message = f"""Dear {name},
+
+Congratulations! Your registration for {program} has been APPROVED.
+
+Next Steps:
+1. Complete your payment if not done
+2. Check your email for course materials
+3. Attend orientation on the scheduled date
+
+For support: 0557782728
+Email: akogokennedy@gmail.com
+
+Welcome to AfIMMP!"""
+
+    encoded_message = requests.utils.quote(message)
+    key = settings.MNOTIFY_API_KEY
+    sender_id = 'AfIMMP'
+
+    url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={encoded_message}&sender_id={sender_id}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        print(f"Approval SMS sent successfully to {phone_number}")
+    else:
+        print(f"Failed to send approval SMS to {phone_number}")
+
+
+def send_rejection_sms(registration):
+    """Send SMS notification when registration is rejected"""
+    phone_number = registration.phone
+    name = registration.first_name
+    reason = registration.rejection_reason
+    message = registration.rejection_message or ""
+    
+    sms_text = f"""Dear {name},
+
+We regret to inform you that your registration has been REJECTED.
+
+Reason: {reason}
+
+{message}
+
+You may reapply after addressing the issues mentioned above.
+
+For assistance: 0557782728
+Email: akogokennedy@gmail.com
+
+AfIMMP Admin Team"""
+
+    encoded_message = requests.utils.quote(sms_text)
+    key = settings.MNOTIFY_API_KEY
+    sender_id = 'AfIMMP'
+
+    url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={encoded_message}&sender_id={sender_id}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        print(f"Rejection SMS sent successfully to {phone_number}")
+    else:
+        print(f"Failed to send rejection SMS to {phone_number}")
+
+def send_approval_email(registration):
+    """Send email notification when registration is approved"""
+    subject = '🎉 Registration Approved - AfIMMP'
+    name = registration.first_name
+    program = registration.program_title
+    
+    message = f"""Dear {name},
+
+Congratulations! We are pleased to inform you that your registration for {program} has been APPROVED.
+
+Your journey with the African Institution of Mining Professionals and Practitioners (AfIMMP) begins now!
+
+NEXT STEPS:
+═══════════════════════════════════════════════════════════
+1. Complete Payment: If not already done, please complete your program fee payment
+2. Course Materials: Check your student dashboard for downloadable resources
+3. Orientation: Attend the mandatory orientation session (details will be sent separately)
+4. Academic Calendar: Review the program schedule and important dates
+
+PROGRAM DETAILS:
+═══════════════════════════════════════════════════════════
+Program: {program}
+Fee: GHS 250.00
+Status: ✅ APPROVED
+Approval Date: {registration.approved_date.strftime('%B %d, %Y')}
+
+SUPPORT & CONTACT:
+═══════════════════════════════════════════════════════════
+📞 Phone: 0557782728
+📧 Email: akogokennedy@gmail.com
+🌐 Portal: https://affimpp-regstration.onrender.com/
+
+We are excited to have you join our community of mining professionals and look forward to supporting your career development.
+
+Welcome to AfIMMP!
+
+Best regards,
+
+Prof George Agyei
+CEO, African Institution of Mining Professionals and Practitioners (AfIMMP)
+
+---
+This is an automated message. Please do not reply to this email.
+For support, contact us using the information provided above."""
+
+    email_from = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [registration.email]
+    
+    try:
+        send_mail(subject, message, email_from, recipient_list)
+        print(f"Approval email sent successfully to {registration.email}")
+    except Exception as e:
+        print(f"Failed to send approval email to {registration.email}: {str(e)}")
+
+
+def send_rejection_email(registration):
+    """Send email notification when registration is rejected"""
+    subject = '❌ Registration Status Update - AfIMMP'
+    name = registration.first_name
+    program = registration.program_title
+    reason = registration.rejection_reason
+    additional_message = registration.rejection_message or ""
+    
+    message = f"""Dear {name},
+
+Thank you for your interest in the African Institution of Mining Professionals and Practitioners (AfIMMP).
+
+After careful review of your application for {program}, we regret to inform you that your registration has been REJECTED.
+
+REJECTION DETAILS:
+═══════════════════════════════════════════════════════════
+Program Applied: {program}
+Rejection Reason: {reason}
+Rejection Date: {registration.rejected_date.strftime('%B %d, %Y')}
+
+{f'''
+ADDITIONAL FEEDBACK:
+═══════════════════════════════════════════════════════════
+{additional_message}
+''' if additional_message else ''}
+
+NEXT STEPS:
+═══════════════════════════════════════════════════════════
+- Review the rejection reason(s) carefully
+- Address the issues mentioned above
+- You may reapply once you have resolved the concerns
+- Contact us if you need clarification on the requirements
+
+REAPPLICATION PROCESS:
+═══════════════════════════════════════════════════════════
+You are welcome to submit a new application after addressing the issues mentioned above. Please ensure all requirements are met before reapplying.
+
+SUPPORT & CONTACT:
+═══════════════════════════════════════════════════════════
+📞 Phone: 0557782728
+📧 Email: akogokennedy@gmail.com
+🌐 Portal: https://affimpp-regstration.onrender.com/
+
+We appreciate your interest in AfIMMP and encourage you to reapply once you have addressed the concerns mentioned above.
+
+Best regards,
+
+AfIMMP Admissions Team
+African Institution of Mining Professionals and Practitioners
+
+---
+This is an automated message. Please do not reply to this email.
+For support, contact us using the information provided above."""
+
+    email_from = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [registration.email]
+    
+    try:
+        send_mail(subject, message, email_from, recipient_list)
+        print(f"Rejection email sent successfully to {registration.email}")
+    except Exception as e:
+        print(f"Failed to send rejection email to {registration.email}: {str(e)}")
+
+
+
+
+def send_approval_email(registration):
+    """Send email notification when registration is approved"""
+    subject = '🎉 Registration Approved - AfIMMP'
+    name = registration.first_name
+    program = registration.program_title
+    
+    message = f"""Dear {name},
+
+Congratulations! We are pleased to inform you that your registration for {program} has been APPROVED.
+
+Your journey with the African Institution of Mining Professionals and Practitioners (AfIMMP) begins now!
+
+NEXT STEPS:
+═══════════════════════════════════════════════════════════
+1. Complete Payment: If not already done, please complete your program fee payment
+2. Course Materials: Check your student dashboard for downloadable resources
+3. Orientation: Attend the mandatory orientation session (details will be sent separately)
+4. Academic Calendar: Review the program schedule and important dates
+
+PROGRAM DETAILS:
+═══════════════════════════════════════════════════════════
+Program: {program}
+Fee: GHS 250.00
+Status: ✅ APPROVED
+Approval Date: {registration.approved_date.strftime('%B %d, %Y')}
+
+SUPPORT & CONTACT:
+═══════════════════════════════════════════════════════════
+📞 Phone: 0557782728
+📧 Email: akogokennedy@gmail.com
+🌐 Portal: https://affimpp-regstration.onrender.com/
+
+We are excited to have you join our community of mining professionals and look forward to supporting your career development.
+
+Welcome to AfIMMP!
+
+Best regards,
+
+Prof George Agyei
+CEO, African Institution of Mining Professionals and Practitioners (AfIMMP)
+
+---
+This is an automated message. Please do not reply to this email.
+For support, contact us using the information provided above."""
+
+    email_from = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [registration.email]
+    
+    try:
+        send_mail(subject, message, email_from, recipient_list)
+        print(f"Approval email sent successfully to {registration.email}")
+    except Exception as e:
+        print(f"Failed to send approval email to {registration.email}: {str(e)}")
+
+
+def send_rejection_email(registration):
+    """Send email notification when registration is rejected"""
+    subject = '❌ Registration Status Update - AfIMMP'
+    name = registration.first_name
+    program = registration.program_title
+    reason = registration.rejection_reason
+    additional_message = registration.rejection_message or ""
+    
+    message = f"""Dear {name},
+
+Thank you for your interest in the African Institution of Mining Professionals and Practitioners (AfIMMP).
+
+After careful review of your application for {program}, we regret to inform you that your registration has been REJECTED.
+
+REJECTION DETAILS:
+═══════════════════════════════════════════════════════════
+Program Applied: {program}
+Rejection Reason: {reason}
+Rejection Date: {registration.rejected_date.strftime('%B %d, %Y')}
+
+{f'''
+ADDITIONAL FEEDBACK:
+═══════════════════════════════════════════════════════════
+{additional_message}
+''' if additional_message else ''}
+
+NEXT STEPS:
+═══════════════════════════════════════════════════════════
+- Review the rejection reason(s) carefully
+- Address the issues mentioned above
+- You may reapply once you have resolved the concerns
+- Contact us if you need clarification on the requirements
+
+REAPPLICATION PROCESS:
+═══════════════════════════════════════════════════════════
+You are welcome to submit a new application after addressing the issues mentioned above. Please ensure all requirements are met before reapplying.
+
+SUPPORT & CONTACT:
+═══════════════════════════════════════════════════════════
+📞 Phone: 0557782728
+📧 Email: akogokennedy@gmail.com
+🌐 Portal: https://affimpp-regstration.onrender.com/
+
+We appreciate your interest in AfIMMP and encourage you to reapply once you have addressed the concerns mentioned above.
+
+Best regards,
+
+AfIMMP Admissions Team
+African Institution of Mining Professionals and Practitioners
+
+---
+This is an automated message. Please do not reply to this email.
+For support, contact us using the information provided above."""
+
+    email_from = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [registration.email]
+    
+    try:
+        send_mail(subject, message, email_from, recipient_list)
+        print(f"Rejection email sent successfully to {registration.email}")
+    except Exception as e:
+        print(f"Failed to send rejection email to {registration.email}: {str(e)}")
+
+
+def send_approval_sms(registration):
+    """Send SMS notification when registration is approved"""
+    phone_number = registration.phone
+    name = registration.first_name
+    program = registration.program_title
+    
+    message = f"""🎉 APPROVED! Dear {name},
+
+Your registration for {program} has been APPROVED!
+
+Next Steps:
+✅ Complete payment if pending
+✅ Check email for details
+✅ Attend orientation
+
+Support: 0557782728
+Email: akogokennedy@gmail.com
+
+Welcome to AfIMMP! 🎓"""
+
+    encoded_message = requests.utils.quote(message)
+    key = settings.MNOTIFY_API_KEY
+    sender_id = 'AfIMMP'
+
+    url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={encoded_message}&sender_id={sender_id}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        print(f"Approval SMS sent successfully to {phone_number}")
+    else:
+        print(f"Failed to send approval SMS to {phone_number}")
+
+
+def send_rejection_sms(registration):
+    """Send SMS notification when registration is rejected"""
+    phone_number = registration.phone
+    name = registration.first_name
+    reason = registration.rejection_reason
+    
+    message = f"""❌ REJECTED: Dear {name},
+
+Your registration has been rejected.
+
+Reason: {reason}
+
+You may reapply after addressing the issues. Check your email for full details.
+
+Support: 0557782728
+Email: akogokennedy@gmail.com
+
+AfIMMP Admin Team"""
+
+    encoded_message = requests.utils.quote(message)
+    key = settings.MNOTIFY_API_KEY
+    sender_id = 'AfIMMP'
+
+    url = f"https://apps.mnotify.net/smsapi?key={key}&to={phone_number}&msg={encoded_message}&sender_id={sender_id}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        print(f"Rejection SMS sent successfully to {phone_number}")
+    else:
+        print(f"Failed to send rejection SMS to {phone_number}")
+
+
+@login_required
+def student_profile(request):
+    """Student Profile View"""
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        profile = None
+    
+    registrations = Registration.objects.filter(user=request.user)
+    
+    context = {
+        'user': request.user,
+        'profile': profile,
+        'registrations': registrations,
+    }
+    
+    return render(request, "base/student_dashboard.html", context)
+
+
+
+@login_required(login_url=settings.ADMIN_LOGIN_URL)
+@user_passes_test(is_admin)
+def get_registration_details(request, registration_id):
+    """Get detailed registration information"""
+    try:
+        registration = Registration.objects.get(id=registration_id)
+        data = {
+            'id': registration.id,
+            'prefix': registration.prefix,
+            'firstName': registration.first_name,
+            'middleName': registration.middle_name,
+            'lastName': registration.last_name,
+            'email': registration.email,
+            'phone': registration.phone,
+            'dob': registration.dob.strftime('%Y-%m-%d'),
+            'gender': registration.gender,
+            'nationality': registration.nationality,
+            'address': registration.address,
+            'address2': registration.address2,
+            'city': registration.city,
+            'state': registration.state,
+            'postalCode': registration.postal_code,
+            'programTitle': registration.program_title,
+            'status': registration.status,
+            'paymentStatus': registration.payment_status,
+            'amount': str(registration.amount),
+            'dateSubmitted': registration.date_submitted.strftime('%B %d, %Y'),
+            'educationLevel': registration.education_level,
+            'qualifications': registration.qualifications,
+            'institutions': registration.institutions_attended,
+            'occupation': registration.current_occupation,
+            'experience': registration.years_experience,
+            'skills': registration.relevant_skills,
+            'rejectionReason': registration.rejection_reason,
+            'rejectionMessage': registration.rejection_message,
+            'rejectedDate': registration.rejected_date.strftime('%B %d, %Y') if registration.rejected_date else None,
+        }
+        return JsonResponse(data)
+    except Registration.DoesNotExist:
+        return JsonResponse({'error': 'Registration not found'}, status=404)
