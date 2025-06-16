@@ -48,7 +48,7 @@ class Registration(models.Model):
     phone = models.CharField(max_length=15)
     email = models.EmailField()
     payment_status = models.BooleanField(default=False)  # Payment status for this specific course
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=250.00)  # Default course fee
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=1)  # Default course fee
 
     status = models.CharField(
         max_length=50,
@@ -80,6 +80,11 @@ class Registration(models.Model):
     education_certificates = models.FileField(upload_to='documents/')
     
     date_submitted = models.DateTimeField(default=now)
+    # Add these fields to your Registration model
+    rejection_reason = models.CharField(max_length=255, blank=True, null=True)
+    rejection_message = models.TextField(blank=True, null=True)
+    approved_date = models.DateTimeField(blank=True, null=True)
+    rejected_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.program_title}"
